@@ -45,18 +45,23 @@ def detect_functions(file_path):
         file_content = f.read()
 
     function_regex = re.compile(r"(function\s+(\w+)\s*\()")
-    returns_regex = re.compile(r"\breturns\b")
 
     matches = []
 
     for match in function_regex.finditer(file_content):
         function_name = match.group(2)
-
-        if returns_regex.search(match.group(0)):
-            continue
-
-        visibility_regex = re.compile(r"\b(public|external|internal|private|payable)\b")
         function_declaration = match.group(0) + file_content[match.end():]
+
+        # Check if the function declaration has a return statement
+        returns_regex = re.compile(r"\breturns\s+(.+)\b")
+        returns_match = returns_regex.search(function_declaration)
+
+        if returns_match:
+            # If it does, extract the return type and remove it from the function declaration
+            return_type = returns_match.group(1)
+            function_declaration = function_declaration.replace(f"returns {return_type}", "")
+
+        visibility_regex = re.compile(r"\b(public|external|internal|private|payable|view|pure)\b")
         visibility_match = visibility_regex.search(function_declaration)
 
         visibility = ''
@@ -64,12 +69,12 @@ def detect_functions(file_path):
 
         if visibility_match:
             visibility = visibility_match.group(1) + ' '
-            modifiers_regex = re.compile(r"(?<!view)(?<!pure)(?<!virtual)(?<!override)\b\w+\b")
+            modifiers_regex = re.compile(r"(?<!view)(?<!pure)(?<!virtual)(?<!override)(?<!returns)\b\w+\b")
             body_start_match = re.search(r"{", function_declaration)
             if body_start_match:
                 body_start_index = body_start_match.start()
                 modifiers_match = modifiers_regex.findall(function_declaration[visibility_match.end():body_start_index])
-                modifiers = [modifier for modifier in modifiers_match if modifier not in ['override']]
+                modifiers = [modifier for modifier in modifiers_match if modifier not in ['override','virtual','view','pure','returns']]
 
         matches.append({
             "name": function_name,
