@@ -74,7 +74,7 @@ def detect_functions(file_path):
             if body_start_match:
                 body_start_index = body_start_match.start()
                 modifiers_match = modifiers_regex.findall(function_declaration[visibility_match.end():body_start_index])
-                modifiers = [modifier for modifier in modifiers_match if modifier not in ['override','virtual','view','pure','returns']]
+                modifiers = [modifier for modifier in modifiers_match if modifier not in ['override','virtual','view','pure','returns','payable']]
 
         matches.append({
             "name": function_name,
