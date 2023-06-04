@@ -16,7 +16,7 @@ def find_constructors(path):
             for match in matches:
                 args, code = match
                 print(Fore.GREEN + f"Constructor in {os.path.basename(file)}:" + Style.RESET_ALL)
-                if "== address(0)" in code:
+                if "== address(0)" or "!= address(0)" in code:
                     print(Fore.RED + "Potential 0 address check exists" + Style.RESET_ALL)
                 print(Fore.YELLOW + f"Arguments: {args.strip()}" + Style.RESET_ALL)
                 print(Fore.BLUE + f"Code: {code.strip()}" + Style.RESET_ALL)
